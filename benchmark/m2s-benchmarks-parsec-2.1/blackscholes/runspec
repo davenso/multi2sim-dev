@@ -1,0 +1,3 @@
+exe = blackscholes
+args = $NTHREADS in_16K.txt prices.txt
+

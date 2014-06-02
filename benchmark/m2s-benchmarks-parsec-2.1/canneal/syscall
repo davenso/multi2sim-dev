@@ -1,0 +1,282 @@
+context 1000 changed status to {running}
+syscall 'brk' (code 45, inst 1200, pid 1000)
+  newbrk=0x0 (previous brk was 0x8055000)
+  return=0x8055000
+syscall 'newuname' (code 122, inst 2627, pid 1000)
+  putsname=0xfffdfc66
+  return=0x0
+syscall 'access' (code 33, inst 3256, pid 1000)
+  filename='/etc/ld.so.preload', mode=0x4
+  fullpath='/etc/ld.so.preload'
+  mode={R_OK}
+  return=0xfffffffe
+syscall 'open' (code 5, inst 4067, pid 1000)
+  filename='/etc/ld.so.cache' flags=0x0, mode=0x0
+  fullpath='/etc/ld.so.cache'
+  flags={}
+  return=0x5
+syscall 'fstat64' (code 197, inst 4090, pid 1000)
+  fd=0x5, pstatbuf=0xfffdf944
+  efd=0x5
+  stat64 structure:
+    dev=2050, ino=90765, mode=33188, nlink=1
+    uid=0, gid=0, rdev=0
+    size=111570, blksize=4096, blocks=224
+  return=0x0
+syscall 'mmap2' (code 192, inst 4124, pid 1000)
+  addr=0x0, len=111570, prot=0x1, flags=0x2, fd=0x5, offset=0x0
+  prot={PROT_READ}, flags={MAP_PRIVATE}
+  efd=0x5
+  return=0xb7f95000
+syscall 'close' (code 6, inst 4140, pid 1000)
+  fd=0x5
+  efd=0x5
+  return=0x0
+syscall 'open' (code 5, inst 5971, pid 1000)
+  filename='/usr/lib/libstdc++.so.6' flags=0x0, mode=0x0
+  fullpath='/usr/lib/libstdc++.so.6'
+  flags={}
+  return=0x5
+syscall 'read' (code 3, inst 5993, pid 1000)
+  fd=0x5, pbuf=0xfffdfa5c, count=0x200
+  efd=0x5
+  return=0x200
+syscall 'fstat64' (code 197, inst 6409, pid 1000)
+  fd=0x5, pstatbuf=0xfffdf984
+  efd=0x5
+  stat64 structure:
+    dev=2050, ino=78996, mode=33261, nlink=1
+    uid=0, gid=0, rdev=0
+    size=954696, blksize=4096, blocks=1872
+  return=0x0
+syscall 'mmap2' (code 192, inst 7381, pid 1000)
+  addr=0x0, len=979852, prot=0x5, flags=0x802, fd=0x5, offset=0x0
+  prot={PROT_READ|PROT_EXEC}, flags={MAP_PRIVATE|MAP_DENYWRITE}
+  efd=0x5
+  return=0xb7ea5000
+syscall 'fadvise64' (code 250, inst 7418, pid 1000)
+  fd=5, off={0x0, 0x0}, len=979852, advice=3
+  return=0x0
+syscall 'mmap2' (code 192, inst 7516, pid 1000)
+  addr=0xb7f89000, len=20480, prot=0x3, flags=0x812, fd=0x5, offset=0xe4
+  prot={PROT_READ|PROT_WRITE}, flags={MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE}
+  efd=0x5
+  return=0xb7f89000
+syscall 'mmap2' (code 192, inst 7613, pid 1000)
+  addr=0xb7f8e000, len=25484, prot=0x3, flags=0x32, fd=0xffffffff, offset=0x0
+  prot={PROT_READ|PROT_WRITE}, flags={MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS}
+  return=0xb7f8e000
+syscall 'close' (code 6, inst 7967, pid 1000)
+  fd=0x5
+  efd=0x5
+  return=0x0
+syscall 'open' (code 5, inst 10166, pid 1000)
+  filename='/lib/libm.so.6' flags=0x0, mode=0x0
+  fullpath='/lib/libm.so.6'
+  flags={}
+  return=0x5
+syscall 'read' (code 3, inst 10188, pid 1000)
+  fd=0x5, pbuf=0xfffdfa40, count=0x200
+  efd=0x5
+  return=0x200
+syscall 'fstat64' (code 197, inst 10588, pid 1000)
+  fd=0x5, pstatbuf=0xfffdf968
+  efd=0x5
+  stat64 structure:
+    dev=2050, ino=139531, mode=33261, nlink=1
+    uid=0, gid=0, rdev=0
+    size=165924, blksize=4096, blocks=328
+  return=0x0
+syscall 'mmap2' (code 192, inst 10816, pid 1000)
+  addr=0x0, len=4096, prot=0x3, flags=0x22, fd=0xffffffff, offset=0x0
+  prot={PROT_READ|PROT_WRITE}, flags={MAP_PRIVATE|MAP_ANONYMOUS}
+  return=0xb7ea4000
+syscall 'mmap2' (code 192, inst 11535, pid 1000)
+  addr=0x0, len=163968, prot=0x5, flags=0x802, fd=0x5, offset=0x0
+  prot={PROT_READ|PROT_EXEC}, flags={MAP_PRIVATE|MAP_DENYWRITE}
+  efd=0x5
+  return=0xb7e7b000
+syscall 'fadvise64' (code 250, inst 11572, pid 1000)
+  fd=5, off={0x0, 0x0}, len=163968, advice=3
+  return=0x0
+syscall 'mmap2' (code 192, inst 11647, pid 1000)
+  addr=0xb7ea2000, len=8192, prot=0x3, flags=0x812, fd=0x5, offset=0x27
+  prot={PROT_READ|PROT_WRITE}, flags={MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE}
+  efd=0x5
+  return=0xb7ea2000
+syscall 'close' (code 6, inst 12049, pid 1000)
+  fd=0x5
+  efd=0x5
+  return=0x0
+syscall 'open' (code 5, inst 14870, pid 1000)
+  filename='/lib/libpthread.so.0' flags=0x0, mode=0x0
+  fullpath='/lib/libpthread.so.0'
+  flags={}
+  return=0x5
+syscall 'read' (code 3, inst 14892, pid 1000)
+  fd=0x5, pbuf=0xfffdfa24, count=0x200
+  efd=0x5
+  return=0x200
+syscall 'fstat64' (code 197, inst 15295, pid 1000)
+  fd=0x5, pstatbuf=0xfffdf94c
+  efd=0x5
+  stat64 structure:
+    dev=2050, ino=131272, mode=33261, nlink=1
+    uid=0, gid=0, rdev=0
+    size=120692, blksize=4096, blocks=240
+  return=0x0
+syscall 'mmap2' (code 192, inst 16260, pid 1000)
+  addr=0x0, len=102892, prot=0x5, flags=0x802, fd=0x5, offset=0x0
+  prot={PROT_READ|PROT_EXEC}, flags={MAP_PRIVATE|MAP_DENYWRITE}
+  efd=0x5
+  return=0xb7e61000
+syscall 'fadvise64' (code 250, inst 16297, pid 1000)
+  fd=5, off={0x0, 0x0}, len=102892, advice=3
+  return=0x0
+syscall 'mmap2' (code 192, inst 16372, pid 1000)
+  addr=0xb7e77000, len=8192, prot=0x3, flags=0x812, fd=0x5, offset=0x15
+  prot={PROT_READ|PROT_WRITE}, flags={MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE}
+  efd=0x5
+  return=0xb7e77000
+syscall 'mmap2' (code 192, inst 16469, pid 1000)
+  addr=0xb7e79000, len=4588, prot=0x3, flags=0x32, fd=0xffffffff, offset=0x0
+  prot={PROT_READ|PROT_WRITE}, flags={MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS}
+  return=0xb7e79000
+syscall 'close' (code 6, inst 16839, pid 1000)
+  fd=0x5
+  efd=0x5
+  return=0x0
+syscall 'open' (code 5, inst 19420, pid 1000)
+  filename='/lib/libc.so.6' flags=0x0, mode=0x0
+  fullpath='/lib/libc.so.6'
+  flags={}
+  return=0x5
+syscall 'read' (code 3, inst 19442, pid 1000)
+  fd=0x5, pbuf=0xfffdfa08, count=0x200
+  efd=0x5
+  return=0x200
+syscall 'fstat64' (code 197, inst 19842, pid 1000)
+  fd=0x5, pstatbuf=0xfffdf930
+  efd=0x5
+  stat64 structure:
+    dev=2050, ino=139528, mode=33261, nlink=1
+    uid=0, gid=0, rdev=0
+    size=1430104, blksize=4096, blocks=2800
+  return=0x0
+syscall 'mmap2' (code 192, inst 20847, pid 1000)
+  addr=0x0, len=1440072, prot=0x5, flags=0x802, fd=0x5, offset=0x0
+  prot={PROT_READ|PROT_EXEC}, flags={MAP_PRIVATE|MAP_DENYWRITE}
+  efd=0x5
+  return=0xb7d01000
+syscall 'fadvise64' (code 250, inst 20884, pid 1000)
+  fd=5, off={0x0, 0x0}, len=1440072, advice=3
+  return=0x0
+syscall 'mprotect' (code 125, inst 20924, pid 1000)
+  start=0xb7e5a000, len=0x1000, prot=0x0
+  return=0x0
+syscall 'mmap2' (code 192, inst 20981, pid 1000)
+  addr=0xb7e5b000, len=12288, prot=0x3, flags=0x812, fd=0x5, offset=0x159
+  prot={PROT_READ|PROT_WRITE}, flags={MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE}
+  efd=0x5
+  return=0xb7e5b000
+syscall 'mmap2' (code 192, inst 21078, pid 1000)
+  addr=0xb7e5e000, len=10568, prot=0x3, flags=0x32, fd=0xffffffff, offset=0x0
+  prot={PROT_READ|PROT_WRITE}, flags={MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS}
+  return=0xb7e5e000
+syscall 'close' (code 6, inst 21433, pid 1000)
+  fd=0x5
+  efd=0x5
+  return=0x0
+syscall 'open' (code 5, inst 27153, pid 1000)
+  filename='/lib/libgcc_s.so.1' flags=0x0, mode=0x5
+  fullpath='/lib/libgcc_s.so.1'
+  flags={}
+  return=0x5
+syscall 'read' (code 3, inst 27175, pid 1000)
+  fd=0x5, pbuf=0xfffdf944, count=0x200
+  efd=0x5
+  return=0x200
+syscall 'fstat64' (code 197, inst 27571, pid 1000)
+  fd=0x5, pstatbuf=0xfffdf86c
+  efd=0x5
+  stat64 structure:
+    dev=2050, ino=143070, mode=33261, nlink=1
+    uid=0, gid=0, rdev=0
+    size=120444, blksize=4096, blocks=240
+  return=0x0
+syscall 'mmap2' (code 192, inst 28521, pid 1000)
+  addr=0x0, len=123432, prot=0x5, flags=0x802, fd=0x5, offset=0x0
+  prot={PROT_READ|PROT_EXEC}, flags={MAP_PRIVATE|MAP_DENYWRITE}
+  efd=0x5
+  return=0xb7ce2000
+syscall 'fadvise64' (code 250, inst 28558, pid 1000)
+  fd=5, off={0x0, 0x0}, len=123432, advice=3
+  return=0x0
+syscall 'mmap2' (code 192, inst 28656, pid 1000)
+  addr=0xb7cff000, len=8192, prot=0x3, flags=0x812, fd=0x5, offset=0x1c
+  prot={PROT_READ|PROT_WRITE}, flags={MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE}
+  efd=0x5
+  return=0xb7cff000
+syscall 'close' (code 6, inst 29051, pid 1000)
+  fd=0x5
+  efd=0x5
+  return=0x0
+syscall 'mmap2' (code 192, inst 52484, pid 1000)
+  addr=0x0, len=4096, prot=0x3, flags=0x22, fd=0xffffffff, offset=0x0
+  prot={PROT_READ|PROT_WRITE}, flags={MAP_PRIVATE|MAP_ANONYMOUS}
+  return=0xb7ce1000
+syscall 'mmap2' (code 192, inst 55490, pid 1000)
+  addr=0x0, len=4096, prot=0x3, flags=0x22, fd=0xffffffff, offset=0x0
+  prot={PROT_READ|PROT_WRITE}, flags={MAP_PRIVATE|MAP_ANONYMOUS}
+  return=0xb7ce0000
+syscall 'set_thread_area' (code 243, inst 55639, pid 1000)
+  puinfo=0xfffdfe20
+  entry_number=0xffffffff, base_addr=0xb7ce06d0, limit=0xfffff
+  seg_32bit=0x1, contents=0x0, read_exec_only=0x0
+  limit_in_pages=0x1, seg_not_present=0x0, useable=0x1
+  return=0x0
+syscall 'open' (code 5, inst 55679, pid 1000)
+  filename='/dev/urandom' flags=0x0, mode=0x6
+  fullpath='/dev/urandom'
+  flags={}
+  return=0x5
+syscall 'read' (code 3, inst 55697, pid 1000)
+  fd=0x5, pbuf=0xfffdfe2c, count=0x4
+  efd=0x5
+  return=0x4
+syscall 'close' (code 6, inst 55708, pid 1000)
+  fd=0x5
+  efd=0x5
+  return=0x0
+syscall 'mprotect' (code 125, inst 60417, pid 1000)
+  start=0xb7cff000, len=0x1000, prot=0x1
+  return=0x0
+syscall 'mprotect' (code 125, inst 140457, pid 1000)
+  start=0xb7e5b000, len=0x2000, prot=0x1
+  return=0x0
+syscall 'mprotect' (code 125, inst 153628, pid 1000)
+  start=0xb7e77000, len=0x1000, prot=0x1
+  return=0x0
+syscall 'mprotect' (code 125, inst 160958, pid 1000)
+  start=0xb7ea2000, len=0x1000, prot=0x1
+  return=0x0
+syscall 'mprotect' (code 125, inst 1274345, pid 1000)
+  start=0xb7f89000, len=0x4000, prot=0x1
+  return=0x0
+syscall 'munmap' (code 91, inst 1294412, pid 1000)
+  addr=0xb7f95000, size=0x1b3d2
+  return=0x0
+syscall 'set_tid_address' (code 258, inst 1294550, pid 1000)
+  tidptr=0xb7ce0738
+  return=0x3e8
+syscall 'set_robust_list' (code 311, inst 1294570, pid 1000)
+  head=0xb7ce0740, len=12
+  return=0x0
+syscall 'futex' (code 240, inst 1294582, pid 1000)
+  addr1=0xfffdff40, op=129, val1=1, ptimeout=0x6, addr2=0xb7e77ff4, val3=-1211234608
+  futex=0, cmd=1 (FUTEX_WAKE)
+  futex at 0xfffdff40: 0 processes woken up
+  return=0x0
+syscall 'futex' (code 240, inst 1294602, pid 1000)
+  addr1=0xfffdff40, op=393, val1=1, ptimeout=0x0, addr2=0x0, val3=-1211234608
+  futex=0, cmd=9 (FUTEX_WAIT_BITSET)

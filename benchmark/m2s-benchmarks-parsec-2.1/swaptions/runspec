@@ -1,0 +1,2 @@
+exe = swaptions
+args = -ns 32 -sm 10000 -nt $NTHREADS

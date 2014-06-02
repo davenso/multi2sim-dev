@@ -1,0 +1,3 @@
+exe = freqmine
+env = "OMP_NUM_THREADS=$NTHREADS"
+args = kosarak_500k.dat 410

@@ -1,0 +1,2 @@
+exe = rtview
+args = happy_buddha.obj -nodisplay -automove -nthreads $NTHREADS -frames 3 -res 960 540

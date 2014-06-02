@@ -1,0 +1,1 @@
+./bin/linux/release/nearestNeighbor filelist.txt -r 5 -lat 30 -lng 90
