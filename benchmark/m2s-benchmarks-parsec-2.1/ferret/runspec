@@ -1,2 +1,0 @@
-exe = ferret
-args = corel lsh queries 10 20 $NTHREADS output.txt

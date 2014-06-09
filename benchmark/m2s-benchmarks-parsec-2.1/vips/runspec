@@ -1,3 +1,0 @@
-exe = vips
-env = "IM_CONCURRENCY=$NTHREADS"
-args = im_benchmark vulture_2336x2336.v output.v

@@ -1,2 +1,0 @@
-exe = dedup
-args = -c -p -f -t $NTHREADS -i media.dat -o output.dat.ddp
