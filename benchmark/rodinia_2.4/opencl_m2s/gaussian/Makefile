@@ -1,4 +1,4 @@
-include ../../common/make.config
+include ../../common_m2s/make.config
 
 #C compiler
 CC = g++
@@ -11,6 +11,6 @@ EXE = gaussian
 
 release:
 	$(CC) $(CC_FLAGS) -lm2s-opencl  -fopenmp $(SRC) -o $(EXE) -I$(OPENCL_INC) -L$(OPENCL_LIB)
-	
+	m2c --amd --amd-device Tahiti gaussianElim_kernels.cl
 clean: 
-	rm -f $(EXE) 
+	rm -f $(EXE)  gaussianElim_kernels.bin 
