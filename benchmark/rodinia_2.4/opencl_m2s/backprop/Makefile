@@ -1,4 +1,4 @@
-include ../../common/make.config
+include ../../common_m2s/make.config
 
 # C compiler
 CC = g++
@@ -6,7 +6,7 @@ CC_FLAGS = -g -O2  -m32
 
 backprop: backprop.o imagenet.o facetrain.o
 	$(CC) $(CC_FLAGS) backprop_ocl.cpp backprop.o imagenet.o facetrain.o -o backprop -I$(OPENCL_INC) -L$(OPENCL_LIB) -lm2s-opencl
-
+	m2c --amd --amd-device Tahiti backprop_kernel.cl
 %.o: %.[ch]
 	$(CC) $(CC_FLAGS) $< -c
 	
@@ -20,4 +20,4 @@ imagenet.o: imagenet.c
 	$(CC) $(CC_FLAGS) imagenet.c -c
 
 clean:
-	rm -f *.o *~ backprop *.linkinfo
+	rm -f *.o *~ backprop *.linkinfo *.bin

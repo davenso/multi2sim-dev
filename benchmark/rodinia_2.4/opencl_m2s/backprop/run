@@ -1,1 +1,4 @@
-./backprop 65536
+#./backprop 65536
+export M2S_OPENCL_BINARY=/home/yenkai/multi2sim/benchmark/rodinia_2.4/opencl_m2s/backprop/backprop_kernel.bin
+export M2S_BIN=/home/yenkai/multi2sim/bin/m2s
+$M2S_BIN backprop 16
