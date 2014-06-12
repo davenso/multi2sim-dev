@@ -1,1 +1,3 @@
-./bfs ../../data/bfs/graph1MW_6.txt
+export M2S_OPENCL_BINARY=/home/yenkai/multi2sim/benchmark/rodinia_2.4/opencl_m2s/bfs/Kernels.bin
+export M2S_BIN=/home/yenkai/multi2sim/bin/m2s
+$M2S_BIN bfs ../../../data/bfs/graph4096.txt

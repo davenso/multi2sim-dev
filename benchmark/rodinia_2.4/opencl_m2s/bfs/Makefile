@@ -1,4 +1,4 @@
-include ../../common/make.config
+include ../../common_m2s/make.config
 
 #C compiler
 CC = g++
@@ -11,7 +11,7 @@ EXE = bfs
 
 release:$(SRC)
 	$(CC) $(CC_FLAGS)  -fopenmp $(SRC) -o $(EXE) -I$(OPENCL_INC) -L$(OPENCL_LIB) -lm2s-opencl
-
+	m2c --amd --amd-device Tahiti Kernels.cl
 errmsg:$(SRC)
 	$(CC) $(CC_FLAGS)  -fopenmp $(SRC) -o $(EXE) -I$(OPENCL_INC) -L$(OPENCL_LIB) -lm2s-opencl -D ERRMSG PTX_MSG
 
@@ -31,4 +31,4 @@ run:
 	./$(EXE)
 
 clean: $(SRC)
-	rm -f $(EXE) $(EXE).linkinfo result*
+	rm -f $(EXE) $(EXE).linkinfo result* ./*.bin
