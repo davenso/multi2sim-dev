@@ -341,7 +341,7 @@ int main(int argc, char** argv){
 		_clMemset(step_factors, 0, sizeof(float)*nelr);
         printf("finish mem set\n");
 		// make sure CUDA isn't still doing something before we start timing
-		_clFinish();
+		//clFinish();
 		// these need to be computed the first time in order to compute time step
 		std::cout << "Starting..." << std::endl;
 
@@ -353,11 +353,15 @@ int main(int argc, char** argv){
             printf("start compute_step\n");
 			compute_step_factor(nelr, variables, areas, step_factors);
 			for(int j = 0; j < RK; j++){
+                printf("compute flux\n");
 				compute_flux(nelr, elements_surrounding_elements, normals, variables, ff_variable, fluxes, ff_flux_contribution_density_energy, \
 				ff_flux_contribution_momentum_x, ff_flux_contribution_momentum_y, ff_flux_contribution_momentum_z);
-			
+                _clFinish();
+			    printf("time step\n");
 				time_step(j, nelr, old_variables, variables, step_factors, fluxes);
+                _clFinish();
 			}
+             _clFinish();
 		}
 		_clFinish();
 		std::cout << "Saving solution..." << std::endl;

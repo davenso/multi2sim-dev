@@ -1,4 +1,4 @@
-include ../../common/make.config
+include ../../common_m2s/make.config
 #C compiler
 CC = g++
 
@@ -13,7 +13,7 @@ EXE = euler3d
 
 release:$(SRC)
 	$(CC) $(SRC) -o $(EXE) -I$(OPENCL_INC) -L$(OPENCL_LIB) -lm2s-opencl $(FLAGS) 
-
+	m2c --amd --amd-device Tahiti Kernels.cl 
 errmsg:$(SRC)
 	$(CC) $(SRC) -o $(EXE) -I$(OPENCL_INC) -L$(OPENCL_LIB) -lm2s-opencl -D ERRMSG $(FLAGS)
 
@@ -24,4 +24,4 @@ res:$(SRC)
 	$(CC) $(SRC) -o $(EXE) -I$(OPENCL_INC) -L$(OPENCL_LIB)  -lm2s-opencl -D RES_MSG $(FLAGS)
 
 clean: $(SRC)
-	rm -f $(EXE) $(EXE).linkinfo result*
+	rm -f $(EXE) $(EXE).linkinfo result* ./*.bin
