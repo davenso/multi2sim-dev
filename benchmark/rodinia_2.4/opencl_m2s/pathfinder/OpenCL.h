@@ -12,11 +12,11 @@
 #include <OpenCL/cl_ext.h>
 #else
 #include <CL/cl.h>
-#include <CL/cl_gl.h>
-#include <CL/cl_gl_ext.h>
-#include <CL/cl_ext.h>
+#include <GL/gl.h>
+#include <GL/glew.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
 #endif
-
 using namespace std;
 
 class OpenCL

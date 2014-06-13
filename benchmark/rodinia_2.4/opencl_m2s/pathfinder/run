@@ -1,1 +1,4 @@
-./pathfinder 100000 100 20 > result.txt
+#./pathfinder 100000 100 20 > result.txt
+export M2S_OPENCL_BINARY=/home/yenkai/multi2sim/benchmark/rodinia_2.4/opencl_m2s/pathfinder/kernels.bin
+export M2S_BIN=/home/yenkai/multi2sim/bin/m2s
+$M2S_BIN pathfinder 1000 100 20
