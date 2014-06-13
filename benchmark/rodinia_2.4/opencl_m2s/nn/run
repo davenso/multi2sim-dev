@@ -1,1 +1,4 @@
-./nn filelist.txt -r 5 -lat 30 -lng 90
+#./nn filelist.txt -r 5 -lat 30 -lng 90
+export M2S_OPENCL_BINARY=/home/yenkai/multi2sim/benchmark/rodinia_2.4/opencl_m2s/nn/nearestNeighbor_kernel.bin
+export M2S_BIN=/home/yenkai/multi2sim/bin/m2s
+$M2S_BIN nn filelist.txt -r 5 -lat 30 -lng 90 

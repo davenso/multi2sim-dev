@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
   // print out results
   if (!quiet)
     for(i=0;i<resultsCount;i++) {
-      printf("%s --> Distance=%f\n",records[i].recString,records[i].distance);
+      //printf("%s --> Distance=%f\n",records[i].recString,records[i].distance);
     }
   free(recordDistances);
   return 0;
@@ -147,7 +147,7 @@ float *OpenClFindNearestNeighbors(
                                         sizeof(cl_ulong),&eventEnd,NULL);
         cl_errChk(error,"ERROR in Event Profiling (Write End)",true);
 
-        printf("%f [%.2fMB]\t",(float)((eventEnd-eventStart)/1e9),(float)((sizeof(LatLong) * numRecords)/1e6));
+        //printf("%f [%.2fMB]\t",(float)((eventEnd-eventStart)/1e9),(float)((sizeof(LatLong) * numRecords)/1e6));
         totalTime += eventEnd-eventStart;
         // Kernel
         error = clGetEventProfilingInfo(kernelEvent,CL_PROFILING_COMMAND_START,
@@ -157,7 +157,7 @@ float *OpenClFindNearestNeighbors(
                                         sizeof(cl_ulong),&eventEnd,NULL);
         cl_errChk(error,"ERROR in Event Profiling (Kernel End)",true);
 
-        printf("%f\t",(float)((eventEnd-eventStart)/1e9));
+        //printf("%f\t",(float)((eventEnd-eventStart)/1e9));
         totalTime += eventEnd-eventStart;
         // Read Buffer
         error = clGetEventProfilingInfo(readEvent,CL_PROFILING_COMMAND_START,
@@ -167,10 +167,10 @@ float *OpenClFindNearestNeighbors(
                                         sizeof(cl_ulong),&eventEnd,NULL);
         cl_errChk(error,"ERROR in Event Profiling (Read End)",true);
 
-        printf("%f [%.2fMB]\t",(float)((eventEnd-eventStart)/1e9),(float)((sizeof(float) * numRecords)/1e6));
+        //printf("%f [%.2fMB]\t",(float)((eventEnd-eventStart)/1e9),(float)((sizeof(float) * numRecords)/1e6));
         totalTime += eventEnd-eventStart;
         
-        printf("%f\n\n",(float)(totalTime/1e9));
+        //printf("%f\n\n",(float)(totalTime/1e9));
     }
     // 6. return finalized data and release buffers
     clReleaseMemObject(d_locations);
