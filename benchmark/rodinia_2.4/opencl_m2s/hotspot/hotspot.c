@@ -15,7 +15,7 @@ void writeoutput(float *vect, int grid_rows, int grid_cols, char *file) {
 	 for (j=0; j < grid_cols; j++)
 	 {
 
-		 sprintf(str, "%d\t%g\n", index, vect[i*grid_cols+j]);
+		 sprintf(str, "%d\t%f\n", index, vect[i*grid_cols+j]);
 		 fputs(str,fp);
 		 index++;
 	 }
@@ -105,28 +105,28 @@ int compute_tran_temp(cl_mem MatrixPower, cl_mem MatrixTemp[2], int col, int row
 		clSetKernelArg(kernel, 10, sizeof(float), (void *) &Ry);
 		clSetKernelArg(kernel, 11, sizeof(float), (void *) &Rz);
 		clSetKernelArg(kernel, 12, sizeof(float), (void *) &step);
-		
+
+
+        printf("before launch kernel\n");	    	
 		// Launch kernel
 		error = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL);
 		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 		
+        printf("before flush queue\n");
 		// Flush the queue
-		error = clFlush(command_queue);
+		error = clFinish(command_queue);
 		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
-		
+	    printf("before next iteration\n");	
 		// Swap input and output GPU matrices
 		src = 1 - src;
 		dst = 1 - dst;
 	}
-	
+    printf("finish loop\n");	
 	// Wait for all operations to finish
 	error = clFinish(command_queue);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	
-	long long end_time = get_time();
-	long long total_time = (end_time - start_time);	
-	printf("\nKernel time: %.3f seconds\n", ((float) total_time) / (1000*1000));
-	
+    printf("finish clfinish\n");	
 	return src;
 }
 
@@ -255,28 +255,31 @@ int main(int argc, char** argv) {
 	// Create two temperature matrices and copy the temperature input data
 	cl_mem MatrixTemp[2];
 	// Create input memory buffers on device
-	MatrixTemp[0] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingTemp, &error);
+	//MatrixTemp[0] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingTemp, &error);
+	MatrixTemp[0] = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(float) * size, FilesavingTemp, &error);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
-	MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, sizeof(float) * size, NULL, &error);
+	//MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, sizeof(float) * size, NULL, &error);
+	MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(float) * size, NULL, &error);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	
 	// Copy the power input data
-	cl_mem MatrixPower = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingPower, &error);
+	//cl_mem MatrixPower = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingPower, &error);
+	cl_mem MatrixPower = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(float) * size, FilesavingPower, &error);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	
 	// Perform the computation
 	int ret = compute_tran_temp(MatrixPower, MatrixTemp, grid_cols, grid_rows, total_iterations, pyramid_height,
 								blockCols, blockRows, borderCols, borderRows, FilesavingTemp, FilesavingPower);
 	
+    printf("before copy back\n");
 	// Copy final temperature data back
 	cl_float *MatrixOut = (cl_float *) clEnqueueMapBuffer(command_queue, MatrixTemp[ret], CL_TRUE, CL_MAP_READ, 0, sizeof(float) * size, 0, NULL, NULL, &error);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
-	
 	long long end_time = get_time();	
-	printf("Total time: %.3f seconds\n", ((float) (end_time - start_time)) / (1000*1000));
-	
+
+    printf("before write output\n");	
 	// Write final output to output file
-    writeoutput(MatrixOut, grid_rows, grid_cols, ofile);
+    //writeoutput(MatrixOut, grid_rows, grid_cols, ofile);
     
 	error = clEnqueueUnmapMemObject(command_queue, MatrixTemp[ret], (void *) MatrixOut, 0, NULL, NULL);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
@@ -286,6 +289,6 @@ int main(int argc, char** argv) {
 	clReleaseMemObject(MatrixPower);
 	
         clReleaseContext(context);
-
+    printf("finish program\n");
 	return 0;
 }
