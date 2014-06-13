@@ -279,8 +279,10 @@ struct si_work_group_t *si_work_group_create(unsigned int work_group_id,
 			else if (user_elements[i].dataClass ==
 				PTR_INTERNAL_GLOBAL_TABLE)
 			{
-				fatal("%s: PTR_INTERNAL_GLOBAL_TABLE not "
-					"supported", __FUNCTION__);
+                /*fatal("%s: PTR_INTERNAL_GLOBAL_TABLE not "
+                    "supported", __FUNCTION__);*/
+                printf("%s: PTR_INTERNAL_GLOBAL_TABLE not "
+                    "supported\n", __FUNCTION__);
 			}
 			else
 			{
