@@ -91,6 +91,10 @@ __kernel void hotspot(  int iteration,  //number of iteration
 	W = (W < validXmin) ? validXmin : W;
 	E = (E > validXmax) ? validXmax : E;
 
+
+
+    float sum_x, sum_y, sum_z;
+    float scale_sum;
 	bool computed;
 	for (int i=0; i<iteration ; i++){ 
 		computed = false;
@@ -99,11 +103,17 @@ __kernel void hotspot(  int iteration,  //number of iteration
 		IN_RANGE(tx, validXmin, validXmax) && \
 		IN_RANGE(ty, validYmin, validYmax) ) {
 			computed = true;
+/*
 			temp_t[ty][tx] =   temp_on_cuda[ty][tx] + step_div_Cap * (power_on_cuda[ty][tx] + 
 			(temp_on_cuda[S][tx] + temp_on_cuda[N][tx] - 2.0f * temp_on_cuda[ty][tx]) * Ry_1 + 
 			(temp_on_cuda[ty][E] + temp_on_cuda[ty][W] - 2.0f * temp_on_cuda[ty][tx]) * Rx_1 + 
 			(amb_temp - temp_on_cuda[ty][tx]) * Rz_1);
-
+*/
+            sum_y = (temp_on_cuda[S][tx] + temp_on_cuda[N][tx] - 2.0f * temp_on_cuda[ty][tx]) * Ry_1; 
+            sum_x = (temp_on_cuda[ty][E] + temp_on_cuda[ty][W] - 2.0f * temp_on_cuda[ty][tx]) * Rx_1;
+            sum_z = (amb_temp - temp_on_cuda[ty][tx]) * Rz_1;
+            scale_sum = step_div_Cap * (sum_y + sum_x + sum_z);
+            temp_t[ty][tx] = temp_on_cuda[ty][tx] + scale_sum;
 		}
 		barrier(CLK_LOCAL_MEM_FENCE);
 		
