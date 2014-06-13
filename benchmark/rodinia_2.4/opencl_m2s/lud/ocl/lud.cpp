@@ -265,6 +265,7 @@ main ( int argc, char *argv[] )
 
 	  err = clEnqueueNDRangeKernel(cmd_queue, internal, 2, NULL, global_work3, local_work3, 0, 0, 0);
 	  if(err != CL_SUCCESS) { printf("ERROR:  internal clEnqueueNDRangeKernel()=>%d failed\n", err); return -1; }	
+      clFinish(cmd_queue);
 	}
 	clSetKernelArg(diagnal, 0, sizeof(void *), (void*) &d_m);
 	clSetKernelArg(diagnal, 1, sizeof(float) * BLOCK_SIZE * BLOCK_SIZE, (void*)NULL );
@@ -281,7 +282,7 @@ main ( int argc, char *argv[] )
 	clFinish(cmd_queue);
 	/* end of timing point */
 	stopwatch_stop(&sw);
-	printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
+	//printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
 
 	clReleaseMemObject(d_m);
 
@@ -292,7 +293,9 @@ main ( int argc, char *argv[] )
 		lud_verify(mm, m, matrix_dim); 
 		free(mm);
 	}
-
+    else{
+        printf("Skip verification\n");
+    }
 	free(m);
 	
 	if(shutdown()) return -1;

@@ -1,2 +1,6 @@
 # ./lud -i ../../../data/lud/256.dat 
-./lud -s 1024 -v
+#./lud -s 1024 -v
+export M2S_OPENCL_BINARY=/home/yenkai/multi2sim/benchmark/rodinia_2.4/opencl_m2s/lud/ocl/lud_kernel.bin
+export M2S_BIN=/home/yenkai/multi2sim/bin/m2s
+$M2S_BIN lud -s 512
+#$M2S_BIN lud -i  ../../../../data/lud/256.dat
