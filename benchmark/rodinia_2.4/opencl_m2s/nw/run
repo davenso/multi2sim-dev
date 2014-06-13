@@ -1,1 +1,4 @@
-./nw 2048 10 ./nw.cl
+#./nw 2048 10 ./nw.cl
+export M2S_OPENCL_BINARY=/home/yenkai/multi2sim/benchmark/rodinia_2.4/opencl_m2s/nw/nw.bin
+export M2S_BIN=/home/yenkai/multi2sim/bin/m2s
+$M2S_BIN nw 32 10 ./nw.cl
