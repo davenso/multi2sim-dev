@@ -564,7 +564,7 @@ static void opencl_si_kernel_load_metadata_v3(struct opencl_si_kernel_t *kernel)
 		fatal("kernel '%s': unknown metadata entry '%s'",
 			kernel->name, token);
             */
-        printf("kernel '%s': unknown metadata entry '%s'",
+        printf("kernel '%s': unknown metadata entry '%s'\n",
             kernel->name, token);
 	}
 }
