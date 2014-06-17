@@ -1,0 +1,72 @@
+The page table walk
+前面討論的mmu cache針對cpu,64bit  或者 gpu 32bit
+還沒有針對64bit gpu的例子
+
+要做的事：
+
+1.研究multi2sim怎麼處理malloc 之類的system call
+
+2.搞清楚m2s的處理機制,自動加上32bit -> 64bit的offset
+  目前跑得workload,整隻程式程式allocate 500MB上下的memory
+
+3.GPU也會對global的空間做存取
+  模擬出gpu對memory存取的關係
+
+
+論文實作：
+
+模擬出gpu上面的的global memory access, 在64bit情況之下,的gpu mmu cache 設計
+
+
+6/16
+就page所定址能夠達到的範圍: page reach
+
+gem5-gpu有提到的memory現象,在繼續做補充
+
+直接signed extension 32bit memory address到64bit
+
+
+方法,觀察現象：
+1.觀察page table執行路徑
+  用functional model去分析所有的路徑機率
+
+2.觀察page table重複走得情況
+  timing model分析path被重複走到的情況
+2. page 壓縮
+  算entropy, egergodic
+
+
+
+
+
+修改host machine的kernel code
+把opencl程式跑在cpu上面
+得到global address的VA->PA轉換關係的page table
+dump出來變成multi2sim的config檔
+multi2sim讀取這個config檔
+設定mmu內部的記憶體映射關係
+可能用memory module access去設定之類的
+
+
+
+可能問題在於benchmark在compile階段
+是用demand paging的方式做memory的allocation
+
+
+
+工作1:  得到實體機器上面
+
+工作2:  要用m2c提供的提供的flow去編譯才不會在llvm2si的時候core dump, 可以改掉不支援struct的格式,但是有用到math.h的話就還是無解
+
+
+已經porting好多個rodinia benchmark
+跑一下一下tlb miss看看miss rate是否跟gem5-gpu的數據一致
+
+6/15
+
+kernel function編譯目前只能夠使用call amd driver, 下-O0和調整其他的benchmark code
+
+memory trace的部份在translation cache有提到他們的作法, 也是也是只有取virtual address的trace,至於對應的physical mapping沒有特別提到
+
+
+
