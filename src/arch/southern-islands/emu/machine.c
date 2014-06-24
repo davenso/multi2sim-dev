@@ -254,7 +254,11 @@ void si_isa_S_LOAD_DWORDX4_impl(struct si_work_item_t *work_item,
 	m_offset = INST.offset * 4;
 	m_addr = m_base + m_offset;
 
-	assert(!(m_addr & 0x3));
+    //assert(!(m_addr & 0x3));
+    if(m_addr & 0x3){
+        //printf("warning m_addr & 0x3\n");
+        m_addr =  m_addr && 0xfffffffc;
+    }
 
 	for (i = 0; i < 4; i++)
 	{

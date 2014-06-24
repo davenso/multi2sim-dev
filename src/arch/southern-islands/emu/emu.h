@@ -75,7 +75,7 @@ int SIEmuRun(Emu *self);
  */
 
 /* UAV table */
-#define SI_EMU_MAX_NUM_UAVS 16
+#define SI_EMU_MAX_NUM_UAVS 32
 #define SI_EMU_UAV_TABLE_ENTRY_SIZE 32
 #define SI_EMU_UAV_TABLE_SIZE (SI_EMU_MAX_NUM_UAVS * SI_EMU_UAV_TABLE_ENTRY_SIZE)
 

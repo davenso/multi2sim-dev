@@ -39,7 +39,10 @@ void mmu_init(void);
 void mmu_done(void);
 void mmu_dump_report(void);
 
+//yk: address_space_new start from 0, and increase in order
 int mmu_address_space_new(void);
+//yk: call translate to get physical address.
+//yk: If the page doesn't exist, create the one for it
 unsigned int mmu_translate(int address_space_index, unsigned int vtl_addr);
 int mmu_valid_phy_addr(unsigned int phy_addr);
 

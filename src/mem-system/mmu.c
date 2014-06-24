@@ -103,8 +103,8 @@ static struct mmu_page_t *mmu_get_page(int address_space_index, unsigned int vtl
 			break;
 		prev = page;
 		page = page->next;
-	}
-	
+    }
+    //yk multi2sim handle page fault on x86
 	/* Not found */
 	if (!page)
 	{
