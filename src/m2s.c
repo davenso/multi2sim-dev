@@ -2067,7 +2067,7 @@ int main(int argc, char **argv)
 	net_init();
 	mem_system_init();
 	mmu_init();
-
+    gpu_mmu_init();
 	/* Load architectural state checkpoint */
 	if (x86_load_checkpoint_file_name[0])
 		X86EmuLoadCheckpoint(x86_emu, x86_load_checkpoint_file_name);

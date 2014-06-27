@@ -28,8 +28,12 @@ struct si_vector_mem_unit_t
 {
 	struct list_t *issue_buffer;  /* Issued instructions */
 	struct list_t *decode_buffer; /* Decoded instructions */
-	struct list_t *read_buffer;   /* Register reads */
-	struct list_t *mem_buffer;    /* Submitted memory accesses */
+    struct list_t *read_buffer;   /* Register reads */
+    // yk: add translation stage buffer
+    struct list_t *pde_buffer;    /* Look up page directory */
+    struct list_t *pte_buffer;    /* Look up page table */
+
+    struct list_t *mem_buffer;    /* Submitted memory accesses */
 	struct list_t *write_buffer;  /* Register writes */
 
 	struct si_compute_unit_t *compute_unit;
@@ -54,5 +58,7 @@ struct si_vector_mem_unit_t
 	long long inflight_mem_read;
 	long long inflight_mem_write;
 };
+
+
 
 #endif

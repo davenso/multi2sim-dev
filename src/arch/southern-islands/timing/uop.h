@@ -38,6 +38,13 @@ struct si_work_item_uop_t
 	unsigned int global_mem_access_addr;
 	unsigned int global_mem_access_size;
 
+    // yk: add address translation address
+    unsigned int global_pte_access_addr;
+    unsigned int global_pte_access_size;
+    unsigned int global_phy_access_addr;
+    unsigned int global_phy_access_size;
+
+
 	/* Flags */
 	unsigned int active : 1;  /* Active after instruction emulation */
 
@@ -101,7 +108,11 @@ struct si_uop_t
 
 	/* Per stream-core data. This space is dynamically allocated for an uop.
 	 * It should be always the last field of the structure. */
-	struct si_work_item_uop_t work_item_uop[0];
+    struct si_work_item_uop_t work_item_uop[0];
+
+    // yk: support address translation
+    /* Add translation stage number */
+    int stage_number;
 };
 
 

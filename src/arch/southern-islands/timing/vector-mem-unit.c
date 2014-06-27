@@ -32,6 +32,8 @@
 #include "gpu_tlb.h"
 #include "wavefront-pool.h"
 
+#include <mem-system/mmu.h>
+
 void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 {
 	struct si_uop_t *uop = NULL;
@@ -170,30 +172,36 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 	struct si_work_item_uop_t *work_item_uop;
 	struct si_work_item_t *work_item;
 	int work_item_id;
-	int instructions_processed = 0;
-	int list_entries;
-	int i;
-	enum mod_access_kind_t access_kind;
-	int list_index = 0;
+    int instructions_processed = 0;
+    int list_entries;
+    //yk: calculate seperate list entries
+    int list_entries_pde, list_entries_pte, list_entries_mem;
+    int i;
+    enum mod_access_kind_t access_kind;
+    int list_index = 0;
 
-	list_entries = list_count(vector_mem->read_buffer);
+    list_entries = list_count(vector_mem->pte_buffer);
+
+    list_entries_pde = list_count(vector_mem->pde_buffer);
+    list_entries_pte = list_count(vector_mem->pte_buffer);
+    list_entries_mem = list_count(vector_mem->mem_buffer);
 	
 	/* Sanity check the read buffer */
-	assert(list_entries <= si_gpu_vector_mem_read_buffer_size);
+    assert(list_entries <= si_gpu_vector_mem_pte_buffer_size);
 
 	for (i = 0; i < list_entries; i++)
 	{
-		uop = list_get(vector_mem->read_buffer, list_index);
+        uop = list_get(vector_mem->pte_buffer, list_index);
 		assert(uop);
 
 		instructions_processed++;
 
-		/* Uop is not ready yet */
-		if (asTiming(si_gpu)->cycle < uop->read_ready)
-		{
-			list_index++;
-			continue;
-		}
+        /* Uop is not ready yet */
+        if (uop->global_mem_witness)
+        {
+            list_index++;
+            continue;
+        }
 
 		/* Stall if the width has been reached. */
 		if (instructions_processed > si_gpu_vector_mem_width)
@@ -204,23 +212,23 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				uop->wavefront->id, uop->id_in_wavefront);
 			list_index++;
 			continue;
-		}
+        }
 
-		/* Sanity check mem buffer */
-		assert(list_count(vector_mem->mem_buffer) <= 
-			si_gpu_vector_mem_max_inflight_mem_accesses);
+        /* Sanity check mem buffer */
+        assert((list_entries_pde + list_entries_pte + list_entries_mem ) <=
+            si_gpu_vector_mem_max_inflight_mem_accesses);
 
-		/* Stall if there is not room in the memory buffer */
-		if (list_count(vector_mem->mem_buffer) == 
-			si_gpu_vector_mem_max_inflight_mem_accesses)
-		{
-			si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
-				"stg=\"s\"\n", uop->id_in_compute_unit, 
-				vector_mem->compute_unit->id, 
-				uop->wavefront->id, uop->id_in_wavefront);
-			list_index++;
-			continue;
-		}
+        /* Stall if there is not room in the memory buffer */
+        if ( (list_entries_pde + list_entries_pte + list_entries_mem) ==
+            si_gpu_vector_mem_max_inflight_mem_accesses)
+        {
+            si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
+                "stg=\"s\"\n", uop->id_in_compute_unit,
+                vector_mem->compute_unit->id,
+                uop->wavefront->id, uop->id_in_wavefront);
+            list_index++;
+            continue;
+        }
 
 		/* Set the access type */
 		if (uop->vector_mem_write && !uop->glc)
@@ -232,7 +240,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		else 
 			fatal("%s: invalid access kind", __FUNCTION__);
 
-
+/*
         //yk: add TLB simulation here
         //yk: coalese the memory access from wavefront
 		unsigned int vtl_addr[128];
@@ -256,7 +264,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			if(work_item_addr < vector_mem->vtl_min){
 				vector_mem->vtl_min = work_item_addr;
 			}
-			//printf("global addr: %x\n",work_item_uop->global_mem_access_addr);
+            //printf("global addr: %x\n",work_item_uop->global_mem_access_addr);
 
             work_item_addr = work_item_addr & 0xfffff000;
 
@@ -295,8 +303,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			}
 			vector_mem->tlb_access++;
 		}
-
-
+*/
 
 		/* Access global memory */
 		assert(!uop->global_mem_witness);
@@ -307,13 +314,12 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				&uop->work_item_uop[work_item->id_in_wavefront];
 
 
-            // yk: add mmu translation
+            // access kind should be read
+            mod_access(vector_mem->compute_unit->vector_cache,
+                access_kind,
+                work_item_uop->global_phy_access_addr,
+                &uop->global_mem_witness, NULL, NULL, NULL);
 
-
-			mod_access(vector_mem->compute_unit->vector_cache, 
-				access_kind, 
-				work_item_uop->global_mem_access_addr,
-				&uop->global_mem_witness, NULL, NULL, NULL);
 			uop->global_mem_witness--;
 		}
 
@@ -338,7 +344,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		}
 
 		/* Transfer the uop to the mem buffer */
-		list_remove(vector_mem->read_buffer, uop);
+        list_remove(vector_mem->pte_buffer, uop);
 		list_enqueue(vector_mem->mem_buffer, uop);
 
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
@@ -347,6 +353,255 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			uop->id_in_wavefront);
 	}
 }
+void si_vector_mem_pte(struct si_vector_mem_unit_t *vector_mem)
+{
+    struct si_uop_t *uop;
+    struct si_work_item_uop_t *work_item_uop;
+    struct si_work_item_t *work_item;
+    int work_item_id;
+    int instructions_processed = 0;
+    int list_entries;
+    //yk: calculate seperate list entries
+    int list_entries_pde, list_entries_pte, list_entries_mem;
+    int i;
+    enum mod_access_kind_t access_kind;
+    int list_index = 0;
+
+    list_entries = list_count(vector_mem->pde_buffer);
+
+    list_entries_pde = list_count(vector_mem->pde_buffer);
+    list_entries_pte = list_count(vector_mem->pte_buffer);
+    list_entries_mem = list_count(vector_mem->mem_buffer);
+
+    /* Sanity check the read buffer */
+    assert(list_entries <= si_gpu_vector_mem_pde_buffer_size);
+
+    for (i = 0; i < list_entries; i++)
+    {
+        uop = list_get(vector_mem->pde_buffer, list_index);
+        assert(uop);
+
+        instructions_processed++;
+
+
+        /* Uop is not ready yet */
+        if (uop->global_mem_witness)
+        {
+            list_index++;
+            continue;
+        }
+
+        /* Stall if the width has been reached. */
+        if (instructions_processed > si_gpu_vector_mem_width)
+        {
+            si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
+                "stg=\"s\"\n", uop->id_in_compute_unit,
+                vector_mem->compute_unit->id,
+                uop->wavefront->id, uop->id_in_wavefront);
+            list_index++;
+            continue;
+        }
+
+        /* Sanity check mem buffer */
+        assert((list_entries_pde + list_entries_pte + list_entries_mem ) <=
+            si_gpu_vector_mem_max_inflight_mem_accesses);
+
+        /* Stall if there is not room in the memory buffer */
+        if ( (list_entries_pde + list_entries_pte + list_entries_mem) ==
+            si_gpu_vector_mem_max_inflight_mem_accesses)
+        {
+            si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
+                "stg=\"s\"\n", uop->id_in_compute_unit,
+                vector_mem->compute_unit->id,
+                uop->wavefront->id, uop->id_in_wavefront);
+            list_index++;
+            continue;
+        }
+
+        /* Set the access type */
+        // yk: access page is load
+        access_kind = mod_access_load;
+
+        /* Access global memory */
+        assert(!uop->global_mem_witness);
+        unsigned int phys_addr;
+        SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+        {
+            work_item = uop->wavefront->work_items[work_item_id];
+            work_item_uop =
+                &uop->work_item_uop[work_item->id_in_wavefront];
+
+            // yk: initialize memory address
+            //work_item_uop->global_pte_access_addr = NULL;
+            //work_item_uop->global_phy_access_addr = NULL;
+
+            // yk: add mmu translation
+            work_item_uop->global_phy_access_addr  = gpu_mmu_translate_32bit_pagewalk(0, work_item_uop->global_mem_access_addr, work_item_uop->global_pte_access_addr , PTE_MODE );
+            phys_addr = gpu_mmu_get_pte_addr(work_item_uop->global_mem_access_addr ,work_item_uop->global_pte_access_addr);
+            // access kind should be read
+            mod_access(vector_mem->compute_unit->vector_cache,
+                access_kind,
+                phys_addr,
+                &uop->global_mem_witness, NULL, NULL, NULL);
+
+            uop->global_mem_witness--;
+        }
+
+        if(si_spatial_report_active)
+        {
+            if (uop->vector_mem_write)
+            {
+                uop->num_global_mem_write +=
+                    uop->global_mem_witness;
+                si_report_global_mem_inflight(uop->compute_unit,
+                        uop->num_global_mem_write);
+            }
+            else if (uop->vector_mem_read)
+            {
+                uop->num_global_mem_read +=
+                    uop->global_mem_witness;
+                si_report_global_mem_inflight(uop->compute_unit,
+                        uop->num_global_mem_read);
+            }
+            else
+                fatal("%s: invalid access kind", __FUNCTION__);
+        }
+
+        /* Transfer the uop to the mem buffer */
+        list_remove(vector_mem->pde_buffer, uop);
+        list_enqueue(vector_mem->pte_buffer, uop);
+
+        si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
+            "stg=\"mem-m\"\n", uop->id_in_compute_unit,
+            vector_mem->compute_unit->id, uop->wavefront->id,
+            uop->id_in_wavefront);
+    }
+}
+
+void si_vector_mem_pde(struct si_vector_mem_unit_t *vector_mem)
+{
+    struct si_uop_t *uop;
+    struct si_work_item_uop_t *work_item_uop;
+    struct si_work_item_t *work_item;
+    int work_item_id;
+    int instructions_processed = 0;
+    int list_entries;
+    //yk: calculate seperate list entries
+    int list_entries_pde, list_entries_pte, list_entries_mem;
+    int i;
+    enum mod_access_kind_t access_kind;
+    int list_index = 0;
+
+    list_entries = list_count(vector_mem->read_buffer);
+
+    list_entries_pde = list_count(vector_mem->pde_buffer);
+    list_entries_pte = list_count(vector_mem->pte_buffer);
+    list_entries_mem = list_count(vector_mem->mem_buffer);
+
+    /* Sanity check the read buffer */
+    assert(list_entries <= si_gpu_vector_mem_read_buffer_size);
+
+    for (i = 0; i < list_entries; i++)
+    {
+        uop = list_get(vector_mem->read_buffer, list_index);
+        assert(uop);
+
+        instructions_processed++;
+
+        /* Uop is not ready yet */
+        if (asTiming(si_gpu)->cycle < uop->read_ready)
+        {
+            list_index++;
+            continue;
+        }
+
+        /* Stall if the width has been reached. */
+        if (instructions_processed > si_gpu_vector_mem_width)
+        {
+            si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
+                "stg=\"s\"\n", uop->id_in_compute_unit,
+                vector_mem->compute_unit->id,
+                uop->wavefront->id, uop->id_in_wavefront);
+            list_index++;
+            continue;
+        }
+
+        /* Sanity check mem buffer */
+        assert((list_entries_pde + list_entries_pte + list_entries_mem ) <=
+            si_gpu_vector_mem_max_inflight_mem_accesses);
+
+        /* Stall if there is not room in the memory buffer */
+        if ( (list_entries_pde + list_entries_pte + list_entries_mem) ==
+            si_gpu_vector_mem_max_inflight_mem_accesses)
+        {
+            si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
+                "stg=\"s\"\n", uop->id_in_compute_unit,
+                vector_mem->compute_unit->id,
+                uop->wavefront->id, uop->id_in_wavefront);
+            list_index++;
+            continue;
+        }
+
+        /* Set the access type */
+        // yk: access page is load
+        access_kind = mod_access_load;
+
+        /* Access global memory */
+        assert(!uop->global_mem_witness);
+        unsigned int phys_addr;
+        SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+        {
+            work_item = uop->wavefront->work_items[work_item_id];
+            work_item_uop =
+                &uop->work_item_uop[work_item->id_in_wavefront];
+
+            // yk: initialize memory address
+            work_item_uop->global_pte_access_addr = 0;
+            work_item_uop->global_phy_access_addr = 0;
+
+            // yk: add mmu translation
+            phys_addr = gpu_mmu_get_pde_addr(0 , work_item_uop->global_mem_access_addr);
+            work_item_uop->global_pte_access_addr  = gpu_mmu_translate_32bit_pagewalk(0, work_item_uop->global_mem_access_addr, 0x0 , PDE_MODE );
+            // access kind should be read
+            mod_access(vector_mem->compute_unit->vector_cache,
+                access_kind,
+                phys_addr,
+                &uop->global_mem_witness, NULL, NULL, NULL);
+
+            uop->global_mem_witness--;
+        }
+
+        if(si_spatial_report_active)
+        {
+            if (uop->vector_mem_write)
+            {
+                uop->num_global_mem_write +=
+                    uop->global_mem_witness;
+                si_report_global_mem_inflight(uop->compute_unit,
+                        uop->num_global_mem_write);
+            }
+            else if (uop->vector_mem_read)
+            {
+                uop->num_global_mem_read +=
+                    uop->global_mem_witness;
+                si_report_global_mem_inflight(uop->compute_unit,
+                        uop->num_global_mem_read);
+            }
+            else
+                fatal("%s: invalid access kind", __FUNCTION__);
+        }
+
+        /* Transfer the uop to the mem buffer */
+        list_remove(vector_mem->read_buffer, uop);
+        list_enqueue(vector_mem->pde_buffer, uop);
+
+        si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
+            "stg=\"mem-m\"\n", uop->id_in_compute_unit,
+            vector_mem->compute_unit->id, uop->wavefront->id,
+            uop->id_in_wavefront);
+    }
+}
+
 
 void si_vector_mem_read(struct si_vector_mem_unit_t *vector_mem)
 {
@@ -486,8 +741,12 @@ void si_vector_mem_run(struct si_vector_mem_unit_t *vector_mem)
 {
 	/* Local Data Share stages */
 	si_vector_mem_complete(vector_mem);
-	si_vector_mem_write(vector_mem);
-	si_vector_mem_mem(vector_mem);
+    si_vector_mem_write(vector_mem);
+    si_vector_mem_mem(vector_mem);
+    //yk: add translation stages//
+    si_vector_mem_pte(vector_mem);
+    si_vector_mem_pde(vector_mem);
+    //////////////////////////////
 	si_vector_mem_read(vector_mem);
 	si_vector_mem_decode(vector_mem);
 }

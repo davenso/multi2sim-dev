@@ -400,6 +400,10 @@ int si_gpu_vector_mem_max_inflight_mem_accesses = 32;
 int si_gpu_vector_mem_write_latency = 1;
 int si_gpu_vector_mem_write_buffer_size = 1;
 
+//yk: add translation buffer size
+int si_gpu_vector_mem_pde_buffer_size=1;
+int si_gpu_vector_mem_pte_buffer_size=1;
+
 /* LDS memory parameters */
 int si_gpu_lds_size = 65536; /* 64KB */
 int si_gpu_lds_alloc_size = 64; 
