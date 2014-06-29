@@ -102,7 +102,24 @@ global_mem_witness會跑過全部的wavefromt, southern island 7970總共64個�
 
 gpu mmu 架構裡面要有個cr3 register
 
+6/28
+graph algorithm suffur much more on TLB miss
 
+
+6/29
+把configuration設定的跟kaveri接近
+1. How to build up the gpu virtual address support and mmu simulation environment
+2. Run baseline SRAM cache and get basic performance
+%  Problem is the lack of multiple access of memory
+3. Use edram to help imrpove parallel and density
+%  Compare different row bank configuration
+
+4. open / close problem
+%  The overhead of edram, because the high miss rate of each benchmark
+%  consider
+
+
+5. Run opencl program on Kaveri, compare the baseline design runtime between kaveri and multi2sim (verification)
 
 
 
