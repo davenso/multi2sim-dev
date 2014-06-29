@@ -86,7 +86,9 @@ struct si_compute_unit_t *si_compute_unit_create()
 	compute_unit->vector_mem_unit.issue_buffer = list_create();
 	compute_unit->vector_mem_unit.decode_buffer = list_create();
 	compute_unit->vector_mem_unit.read_buffer = list_create();
-	compute_unit->vector_mem_unit.mem_buffer = list_create();
+    compute_unit->vector_mem_unit.mem_buffer = list_create();
+    compute_unit->vector_mem_unit.pte_buffer = list_create();
+    compute_unit->vector_mem_unit.pde_buffer = list_create();
 	compute_unit->vector_mem_unit.write_buffer = list_create();
 	compute_unit->vector_mem_unit.compute_unit = compute_unit;
     //yk: initialize tlb in vector_mem_unit
@@ -186,11 +188,16 @@ void si_compute_unit_free(struct si_compute_unit_t *compute_unit)
 	si_uop_list_free(compute_unit->vector_mem_unit.decode_buffer);
 	si_uop_list_free(compute_unit->vector_mem_unit.read_buffer);
 	si_uop_list_free(compute_unit->vector_mem_unit.mem_buffer);
+    si_uop_list_free(compute_unit->vector_mem_unit.pde_buffer);
+    si_uop_list_free(compute_unit->vector_mem_unit.pte_buffer);
+    compute_unit->vector_mem_unit.pte_buffer = list_create();
 	si_uop_list_free(compute_unit->vector_mem_unit.write_buffer);
 	list_free(compute_unit->vector_mem_unit.issue_buffer);
 	list_free(compute_unit->vector_mem_unit.decode_buffer);
 	list_free(compute_unit->vector_mem_unit.read_buffer);
 	list_free(compute_unit->vector_mem_unit.mem_buffer);
+    list_free(compute_unit->vector_mem_unit.pde_buffer);
+    list_free(compute_unit->vector_mem_unit.pte_buffer);
 	list_free(compute_unit->vector_mem_unit.write_buffer);
     free(compute_unit->vector_mem_unit.l1_tlb);
 

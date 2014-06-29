@@ -417,6 +417,21 @@ void si_vector_mem_pte(struct si_vector_mem_unit_t *vector_mem)
             list_index++;
             continue;
         }
+        /* Sanity check the read buffer */
+        assert(list_count(vector_mem->pte_buffer) <=
+            si_gpu_vector_mem_pte_buffer_size);
+
+        /* Stop if the read buffer is full. */
+        if (list_count(vector_mem->pte_buffer) ==
+            si_gpu_vector_mem_pte_buffer_size)
+        {
+            si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
+                "stg=\"s\"\n", uop->id_in_compute_unit,
+                vector_mem->compute_unit->id,
+                uop->wavefront->id, uop->id_in_wavefront);
+            list_index++;
+            continue;
+        }
 
         /* Set the access type */
         // yk: access page is load
@@ -541,6 +556,23 @@ void si_vector_mem_pde(struct si_vector_mem_unit_t *vector_mem)
             list_index++;
             continue;
         }
+
+        /* Sanity check the read buffer */
+        assert(list_count(vector_mem->pde_buffer) <=
+            si_gpu_vector_mem_pde_buffer_size);
+
+        /* Stop if the read buffer is full. */
+        if (list_count(vector_mem->pde_buffer) ==
+            si_gpu_vector_mem_pde_buffer_size)
+        {
+            si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
+                "stg=\"s\"\n", uop->id_in_compute_unit,
+                vector_mem->compute_unit->id,
+                uop->wavefront->id, uop->id_in_wavefront);
+            list_index++;
+            continue;
+        }
+
 
         /* Set the access type */
         // yk: access page is load

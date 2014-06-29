@@ -25,15 +25,103 @@ gem5-gpu有提到的memory現象,在繼續做補充
 
 直接signed extension 32bit memory address到64bit
 
+6/17
+page table在multi2im裡面是mentain在simulator的data stucture, 而不是在模擬出來的memory上面
+可以嘗試加入event在memory指令上面（或許可以只處理gpu memory相關的指令？）
+延遲access 4筆cache的指令之後,再往後繼續執行程式
+
+1.先不支援unified virtual address, 只單純在gpu上面加上未來會實踐的virtual address轉physical address的機制
+  先參照原本multi2sim的cpu, gpu模擬架構(2邊的memory會分開,自己看到自己的一塊)
+  在gpu的memory指令那邊,多加上模擬mmu translation的機制
+  MMU的cache也是加在gpu那邊
+2.把translation cache的一些概念拿過來用
+  需要先profile page walk的access pattern, 如果有重複性高的行為，則可以對translation做加速？？
+
+6/18
+
+multi2sim設定cpu是functional, gpu是timing
+只考慮gpu那一邊的memory架構
+在southern islandsouthern island上面  加上mmu translation的模擬
+
+目標： custom memory system simulator
+simulate mmu design on GPU
+
+
+
+6/19
+page table有無distance可以作壓縮減少空間？
+個別level的tlb, 雖然已經有被做過了
+
+也是一樣用統計tlb, page table access次數
+TLB的的miss rate不嚴重的話大概是10％以內
+
+計算average memory access latancy
+將次數乘上lantancy反應回原本的時間
+
+
+
+把x86建page table的code搬到gpu這邊
+page table是一個一個擺到physical memory上面的
+
+
+6/20
+老師靠北的
+1.     Show the current status of using Multi2sim to evaluate HSA
+
+2.     Give your modeling of MMU, how we get trace, what results you have collected.
+
+3.     Other slides you have info.
+
+4.     Give benchmarks you have ported and how you ported, what routines you modified
+
+x86模擬使用address translation的時機
+multi2sim用自己實現的x86 micro instruction
+所以在memory指令的前面,會有會有計算address的effective指令
+此address會存在context,下一筆load/store會直接用這個effective adress作存取
+
+在emu的時候的fetch階段
+
+6/21
+GPU上面的global address是怎嚜計算得來的？
+在x86是要在前面有一個effa指令計算
+
+LDS的memory range
+x86等待memory指令finish是如何實現？
+
+
+
+6/23
+witness ptr在mod_access完成的時候會被設定為1
+多建立2個stage作stage的translation,順便紀錄latency
+要有類似x86的page機制,get_page那邊去重新allocate gpu 的global memory
+$$$$$$$$s
+切某一段physical memory address專門放page table, 可以在上面實現tlb或者其他類型的cache
+可以先跑出baseline的gpu mmu design的數據
+global_mem_witness會跑過全部的wavefromt, southern island 7970總共64個所以在si_vector_mem_mem stage會將witness變成-64
+下一個stage會等待全部的memory access都都處理好, witness ptr被累加回0之後才進行.
+
+gpu mmu 架構裡面要有個cr3 register
+
+
+
+
+
+
+
+有了這個架構或許可以同時進行2個gpu process的mmu架構模擬
+同時2個gpu在跑的memory會有什麼問題？
 
 方法,觀察現象：
 1.觀察page table執行路徑
   用functional model去分析所有的路徑機率
 
-2.觀察page table重複走得情況
+2.觀察page table重複走的情況
   timing model分析path被重複走到的情況
-2. page 壓縮
+2.page 壓縮
   算entropy, egergodic
+
+3.分析benchmark 為什麼有的好有的不好
+
 
 
 
@@ -67,6 +155,5 @@ multi2sim讀取這個config檔
 kernel function編譯目前只能夠使用call amd driver, 下-O0和調整其他的benchmark code
 
 memory trace的部份在translation cache有提到他們的作法, 也是也是只有取virtual address的trace,至於對應的physical mapping沒有特別提到
-
 
 

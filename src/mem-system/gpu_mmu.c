@@ -41,7 +41,6 @@ unsigned int gpu_mmu_page_mask;
 
 
 
-
 /*
  * Private variables
  */
@@ -65,6 +64,23 @@ struct gpu_mmu_page_t
     long long num_execute_accesses;
 };
 
+// yk: create walked page struct to save intermediate pages
+struct gpu_mmu_internal_page_t
+{
+    struct gpu_mmu_internal_page_t *next;
+
+
+    int address_space_index;  /* Memory map ID */
+    unsigned int base_addr;  /* The basse/start address of this page */
+    unsigned int page_addr[PAGE_ENTRY_NUM];  /* The  page number address saved in this page*/
+
+    /* Statistics */
+    long long num_read_accesses;
+    long long num_write_accesses;
+    long long num_execute_accesses;
+
+};
+
 /* Memory management unit */
 struct gpu_mmu_t
 {
@@ -72,7 +88,11 @@ struct gpu_mmu_t
     struct list_t *page_list;
 
     /* Hash table of pages */
-    struct gpu_mmu_page_t *page_hash_table[GPU_MMU_PAGE_HASH_SIZE];
+    struct gpu_mmu_internal_page_t *page_hash_table[GPU_MMU_PAGE_HASH_SIZE];
+
+    // yk: support only one process now
+    // yk: If want to extend multiprocess gpu simulation, have to use array to save different process's base_ptr
+    unsigned int page_base_ptr;
 
     /* Report file */
     FILE *report_file;
@@ -86,6 +106,98 @@ static struct gpu_mmu_t *gpu_mmu;
 /*
  * Private Functions
  */
+
+//yk add 32bit translation
+static struct gpu_mmu_internal_page_t *gpu_mmu_get_page_32bit_walk(int address_space_index, unsigned int base_addr, unsigned int page_index){
+    struct gpu_mmu_internal_page_t *prev, *page;
+    unsigned int tag;
+    int index;
+
+    /* Look for page */
+    index = ((base_addr >> gpu_mmu_log_page_size) + address_space_index * 23) % GPU_MMU_PAGE_HASH_SIZE;
+    tag = base_addr & ~gpu_mmu_page_mask;
+    prev = NULL;
+    page = gpu_mmu->page_hash_table[index];
+    while (page)
+    {
+        if ((page->base_addr == tag) && (page->address_space_index == address_space_index))
+            break;
+        prev = page;
+        page = page->next;
+    }
+    //yk: multi2sim handle page fault on x86
+
+    if(!page){
+        //yk: page should have been already allocated
+        printf("page should have been already allocated\n");
+        assert(0);
+    }
+    /* Locate page at the head of the hash table for faster subsequent lookup */
+    if (prev)
+    {
+        prev->next = page->next;
+        page->next = gpu_mmu->page_hash_table[index];
+        gpu_mmu->page_hash_table[index] = page;
+    }
+
+
+    //yk: use index to get the saved next page table physical address
+    //yk: if it is NULL, allocate a new page
+    struct gpu_mmu_internal_page_t  *child_page;
+    int child_index;
+
+    if(page->page_addr[page_index] == NULL){
+        child_page = xcalloc(1, sizeof(struct gpu_mmu_internal_page_t));
+        child_page->address_space_index = address_space_index;
+        child_page->base_ptr = list_count(gpu_mmu->page_list) << gpu_mmu_log_page_size;
+        page->page_addr[page_index] = child_page->base_ptr;
+
+        unsigned int addr_index;
+        for(addr_index = 0; addr_index < PAGE_ENTRY_NUM; addr_index++){
+            child_page -> page_addr[ addr_index ] = NULL;
+        }
+        /* Insert in page list */
+        list_add(gpu_mmu->page_list, child_page);
+
+        /* Insert in page hash table */
+        child_index = (((child_page->base_ptr) >> gpu_mmu_log_page_size) + address_space_index * 23) % GPU_MMU_PAGE_HASH_SIZE;
+        child_page->next = gpu_mmu->page_hash_table[child_index];
+        gpu_mmu->page_hash_table[child_index] = child_page;
+    }
+
+
+    /* Look for page */
+    index = (((page->page_addr[page_index]) >> gpu_mmu_log_page_size) + address_space_index * 23) % GPU_MMU_PAGE_HASH_SIZE;
+    tag = (page->page_addr[page_index]) & ~gpu_mmu_page_mask;
+    prev = NULL;
+    page = gpu_mmu->page_hash_table[index];
+    while (page)
+    {
+        if ((page->base_addr == tag) && (page->address_space_index == address_space_index))
+            break;
+        prev = page;
+        page = page->next;
+    }
+    //yk: multi2sim handle page fault on x86
+
+    if(!page){
+        //yk: page should have been already allocated
+        printf("page should have been already allocated\n");
+        assert(0);
+    }
+    /* Locate page at the head of the hash table for faster subsequent lookup */
+    if (prev)
+    {
+        prev->next = page->next;
+        page->next = gpu_mmu->page_hash_table[index];
+        gpu_mmu->page_hash_table[index] = page;
+    }
+
+    /* Return it */
+    return page;
+}
+
+
 
 static struct gpu_mmu_page_t *gpu_mmu_get_page(int address_space_index, unsigned int vtladdr)
 {
@@ -174,7 +286,7 @@ void gpu_mmu_init()
     /* Initialize */
     gpu_mmu = xcalloc(1, sizeof(struct gpu_mmu_t));
     gpu_mmu->page_list = list_create_with_size(GPU_MMU_PAGE_LIST_SIZE);
-
+    gpu_mmu->page_base_ptr = NULL;
     /* Open report file */
     if (*gpu_mmu_report_file_name)
     {
@@ -249,6 +361,48 @@ int gpu_mmu_address_space_new(void)
     return gpu_mmu_address_space_index++;
 }
 
+unsigned int gpu_mmu_translate_32bit_pagewalk(int address_space_index, unsigned int vtl_addr, unsigned int page_phys_addr ,int mode){
+
+    struct gpu_mmu_internal_page_t *page;
+
+    unsigned int page_index;    // access which index of internal page table
+    unsigned int offset;        // page offset
+    unsigned int phy_addr=NULL;
+
+    offset = vtl_addr & OFFSET_MASK;
+    switch(mode)
+    {
+        case  PDE_MODE:
+            page_index = (vtl_addr & PDE_MASK) >> PDE_SHIFT;
+            page = gpu_mmu_get_page_32bit_walk(address_space_index, gpu_mmu -> page_base_ptr , page_index);
+            break;
+        case  PTE_MODE:
+            page_index = (vtl_addr & PTE_MASK) >> PTE_SHIFT;
+            page = gpu_mmu_get_page_32bit_walk(address_space_index, page_phys_addr           , page_index);
+            break;
+        default:
+            assert(0);
+    }
+
+    assert(page);
+
+    switch(mode)
+    {
+        case  PDE_MODE:
+            phy_addr = page->phy_addr[index];
+            break;
+        case  PTE_MODE:
+            phy_addr = (page->phy_addr[index] & (~OFFSET_MASK)) | offset;
+            break;
+        default:
+            assert(0);
+    }
+
+    assert(phy_addr != NULL);
+    return phy_addr;
+}
+
+
 
 unsigned int gpu_mmu_translate(int address_space_index, unsigned int vtl_addr)
 {
@@ -263,6 +417,45 @@ unsigned int gpu_mmu_translate(int address_space_index, unsigned int vtl_addr)
     phy_addr = page->phy_addr | offset;
     return phy_addr;
 }
+
+
+//work_item_uop->global_mem_access_addr ,work_item_uop->global_pte_access_add
+unsigned int gpu_mmu_get_pte_addr(unsigned int vtl_addr, unsigned int page_addr)
+{
+    unsigned int ret_addr;
+
+    ret_addr = page_addr + (vtl_addr & PTE_MASK ) >> 10;
+
+    return ret_addr;
+}
+
+
+unsigned int gpu_mmu_get_pde_addr(unsigned int vtl_addr){
+    unsigned int ret_addr;
+
+    // Check if the page directory is allocated
+    if(gpu_mmu->page_base_ptr == NULL){
+        page = xcalloc(1, sizeof(struct gpu_mmu_internal_page_t));
+        gpu_mmu -> page_base_ptr = list_count(gpu_mmu->page_list) << gpu_mmu_log_page_size;
+        assert((gpu_mmu -> page_base_ptr & OFFSET_MASK) ==0);
+        page->base_addr = gpu_mmu -> page_base_ptr;
+        page->address_space_index = address_space_index;
+
+        // initialize the address of each entry to NULL
+        unsigned int  addr_index;
+        for(addr_index = 0; addr_index < PAGE_ENTRY_NUM; addr_index++){
+            page -> page_addr[ addr_index ] = NULL;
+        }
+
+        /* Insert in page list */
+        list_add(gpu_mmu->page_list, page);
+    }
+
+    ret_addr = gpu_mmu->page_base_ptr + (vtl_addr & PDE_MASK) >> 20;
+
+    return ret_addr;
+}
+
 
 
 int gpu_mmu_valid_phy_addr(unsigned int phy_addr)

@@ -29,8 +29,11 @@ int gpu_mmu_address_space_new(void);
 unsigned int gpu_mmu_translate(int address_space_index, unsigned int vtl_addr);
 int gpu_mmu_valid_phy_addr(unsigned int phy_addr);
 
-void gpu_mmu_access_page(unsigned int phy_addr, enum mmu_access_t access);
+void gpu_mmu_access_page(unsigned int phy_addr, enum gpu_mmu_access_t access);
 
+unsigned int gpu_mmu_get_pte_addr(unsigned int, unsigned int);
+unsigned int gpu_mmu_get_pde_addr(unsigned int);
+unsigned int gpu_mmu_translate_32bit_pagewalk(int, unsigned int, unsigned int ,int);
 
 
 #endif // GPU_MMU_H
